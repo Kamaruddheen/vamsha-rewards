@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vamsha App MVP</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Arial", sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        color: #333;
+      }
+
+      .container {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .header {
+        text-align: center;
+        color: white;
+        margin-bottom: 30px;
+      }
+
+      .logo {
+        font-size: 2.5em;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .subtitle {
+        font-size: 1.1em;
+        opacity: 0.9;
+      }
+
+      .screen {
+        display: none;
+        background: white;
+        border-radius: 20px;
+        padding: 30px 25px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        flex-grow: 1;
+      }
+
+      .screen.active {
+        display: block;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #555;
+      }
+
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e1e5e9;
+        border-radius: 10px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .btn {
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 20px;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+      }
+
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .error-message {
+        color: #e74c3c;
+        font-size: 14px;
+        margin-top: 5px;
+        display: none;
+      }
+
+      .scratch-card {
+        position: relative;
+        width: 300px;
+        height: 200px;
+        margin: 30px auto;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .scratch-surface {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, silver 0%, darkgray 100%);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 18px;
+        z-index: 2;
+      }
+
+      .scratch-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 3;
+      }
+
+      .prize-reveal {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-align: center;
+        z-index: 1;
+      }
+
+      .prize-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      .prize-description {
+        font-size: 16px;
+        opacity: 0.9;
+      }
+
+      .voucher-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        padding: 25px;
+        color: white;
+        text-align: center;
+        margin: 20px 0;
+      }
+
+      .voucher-number {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 15px 0;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        letter-spacing: 2px;
+      }
+
+      .social-links {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 30px;
+      }
+
+      .social-link {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-decoration: none;
+        font-size: 24px;
+        transition: all 0.3s ease;
+      }
+
+      .social-link.facebook {
+        background: #3b5998;
+      }
+      .social-link.instagram {
+        background: linear-gradient(
+          45deg,
+          #f09433 0%,
+          #e6683c 25%,
+          #dc2743 50%,
+          #cc2366 75%,
+          #bc1888 100%
+        );
+      }
+      .social-link.youtube {
+        background: #ff0000;
+      }
+
+      .social-link:hover {
+        transform: scale(1.1) translateY(-2px);
+      }
+
+      .validation-screen {
+        background: #f8f9fa;
+      }
+
+      .validation-result {
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+        text-align: center;
+      }
+
+      .validation-result.valid {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+      }
+
+      .validation-result.invalid {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+      }
+
+      .staff-toggle {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #28a745;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        font-size: 14px;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+      }
+
+      .confetti {
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        background: #f39c12;
+        animation: confetti-fall 3s ease-out forwards;
+      }
+
+      @keyframes confetti-fall {
+        0% {
+          transform: translateY(-100vh) rotate(0deg);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(100vh) rotate(720deg);
+          opacity: 0;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .container {
+          padding: 15px;
+        }
+
+        .screen {
+          padding: 25px 20px;
+        }
+
+        .logo {
+          font-size: 2em;
+        }
+
+        .scratch-card {
+          width: 280px;
+          height: 180px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">VAMSHA</div>
+        <div class="subtitle">Scratch & Win Amazing Prizes!</div>
+      </div>
+
+      <!-- Registration Screen -->
+      <div class="screen active" id="registrationScreen">
+        <h2 style="text-align: center; margin-bottom: 25px; color: #667eea">
+          Register Now
+        </h2>
+
+        <form id="registrationForm">
+          <div class="form-group">
+            <label for="name">Full Name *</label>
+            <input type="text" id="name" name="name" required />
+            <div class="error-message" id="nameError"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="mobile">Mobile Number *</label>
+            <input
+              type="tel"
+              id="mobile"
+              name="mobile"
+              pattern="[6-9][0-9]{9}"
+              required
+            />
+            <div class="error-message" id="mobileError"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="dob">Date of Birth *</label>
+            <input type="date" id="dob" name="dob" required />
+            <div class="error-message" id="dobError"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="religion">Religion</label>
+            <select id="religion" name="religion">
+              <option value="">Select Religion</option>
+              <option value="Hindu">Hindu</option>
+              <option value="Muslim">Muslim</option>
+              <option value="Christian">Christian</option>
+              <option value="Sikh">Sikh</option>
+              <option value="Buddhist">Buddhist</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="pincode">Pincode *</label>
+            <input
+              type="text"
+              id="pincode"
+              name="pincode"
+              pattern="[0-9]{6}"
+              required
+            />
+            <div class="error-message" id="pincodeError"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="village">Village/City *</label>
+            <input type="text" id="village" name="village" required />
+            <div class="error-message" id="villageError"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="landmark">Landmark (Optional)</label>
+            <input type="text" id="landmark" name="landmark" />
+          </div>
+
+          <button type="submit" class="btn" id="registerBtn">
+            Register & Get Your Prize!
+          </button>
+        </form>
+
+        <div class="social-links">
+          <a
+            href="#"
+            class="social-link facebook"
+            onclick="openSocialLink('facebook')"
+            >f</a
+          >
+          <a
+            href="#"
+            class="social-link instagram"
+            onclick="openSocialLink('instagram')"
+            >📷</a
+          >
+          <a
+            href="#"
+            class="social-link youtube"
+            onclick="openSocialLink('youtube')"
+            >▶</a
+          >
+        </div>
+      </div>
+
+      <!-- Scratch Card Screen -->
+      <div class="screen" id="scratchScreen">
+        <h2 style="text-align: center; margin-bottom: 25px; color: #667eea">
+          Your Scratch Card
+        </h2>
+        <p style="text-align: center; margin-bottom: 20px; color: #666">
+          Scratch the card below to reveal your prize!
+        </p>
+
+        <div class="scratch-card" id="scratchCard">
+          <div class="scratch-surface" id="scratchSurface">
+            <div>Scratch Here to Win!</div>
+          </div>
+          <canvas
+            class="scratch-canvas"
+            id="scratchCanvas"
+            width="300"
+            height="200"
+          ></canvas>
+          <div class="prize-reveal" id="prizeReveal">
+            <div class="prize-title" id="prizeTitle">Congratulations!</div>
+            <div class="prize-description" id="prizeDescription">
+              You won a Free T-Shirt!
+            </div>
+          </div>
+        </div>
+
+        <button
+          class="btn"
+          id="viewVoucherBtn"
+          onclick="showVoucher()"
+          style="display: none"
+        >
+          View My Voucher
+        </button>
+      </div>
+
+      <!-- Voucher Screen -->
+      <div class="screen" id="voucherScreen">
+        <h2 style="text-align: center; margin-bottom: 25px; color: #667eea">
+          Your Voucher
+        </h2>
+
+        <div class="voucher-card">
+          <div>🎉 Congratulations! 🎉</div>
+          <div class="voucher-number" id="voucherNumber">VMS-2024-123456</div>
+          <div style="margin-top: 15px">
+            <strong id="voucherPrize">Free T-Shirt</strong>
+          </div>
+          <div style="margin-top: 10px; font-size: 14px; opacity: 0.9">
+            Show this voucher at any Vamsha showroom to claim your prize
+          </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px">
+          <p style="color: #666; font-size: 14px">
+            Voucher is valid for 30 days from the date of issue.<br />
+            Terms and conditions apply.
+          </p>
+        </div>
+
+        <div class="social-links">
+          <a
+            href="#"
+            class="social-link facebook"
+            onclick="openSocialLink('facebook')"
+            >f</a
+          >
+          <a
+            href="#"
+            class="social-link instagram"
+            onclick="openSocialLink('instagram')"
+            >📷</a
+          >
+          <a
+            href="#"
+            class="social-link youtube"
+            onclick="openSocialLink('youtube')"
+            >▶</a
+          >
+        </div>
+      </div>
+
+      <!-- Staff Validation Screen -->
+      <div class="screen validation-screen" id="validationScreen">
+        <h2 style="text-align: center; margin-bottom: 25px; color: #667eea">
+          Staff Validation
+        </h2>
+
+        <div class="form-group">
+          <label for="voucherInput">Enter Voucher Number</label>
+          <input
+            type="text"
+            id="voucherInput"
+            placeholder="VMS-2024-123456"
+            style="text-transform: uppercase"
+          />
+        </div>
+
+        <button class="btn" onclick="validateVoucher()">
+          Validate Voucher
+        </button>
+
+        <div
+          class="validation-result"
+          id="validationResult"
+          style="display: none"
+        >
+          <div id="validationMessage"></div>
+        </div>
+
+        <button
+          class="btn"
+          onclick="showScreen('registrationScreen')"
+          style="background: #6c757d; margin-top: 20px"
+        >
+          Back to Registration
+        </button>
+      </div>
+    </div>
+
+    <button
+      class="staff-toggle"
+      onclick="showScreen('validationScreen')"
+      title="Staff Mode"
+    >
+      STAFF
+    </button>
+
+    <script>
+      // App State
+      let appState = {
+        currentUser: null,
+        currentVoucher: null,
+        users: JSON.parse(localStorage.getItem("vamsha_users") || "[]"),
+        vouchers: JSON.parse(localStorage.getItem("vamsha_vouchers") || "[]"),
+        voucherCount: parseInt(
+          localStorage.getItem("vamsha_voucher_count") || "0"
+        )
+      }
+
+      // Prize configuration
+      const prizeConfig = {
+        common: {
+          weight: 90,
+          prizes: [
+            "Free T-Shirt",
+            "Keychain",
+            "Sticker Pack",
+            "Phone Stand",
+            "Pen Set"
+          ]
+        },
+        medium: {
+          weight: 5,
+          prizes: [
+            "Backpack",
+            "Water Bottle",
+            "Cap",
+            "Notebook Set",
+            "Power Bank"
+          ]
+        },
+        rare: {
+          weight: 1,
+          prizes: [
+            "Smartphone",
+            "Bluetooth Headphones",
+            "₹500 Gift Voucher",
+            "Smart Watch",
+            "Tablet"
+          ]
+        }
+      }
+
+      // Utility Functions
+      function showScreen(screenId) {
+        document.querySelectorAll(".screen").forEach((screen) => {
+          screen.classList.remove("active")
+        })
+        document.getElementById(screenId).classList.add("active")
+      }
+
+      function generateVoucherNumber() {
+        const prefix = "VMS"
+        const year = new Date().getFullYear()
+        const count = (++appState.voucherCount).toString().padStart(6, "0")
+        localStorage.setItem(
+          "vamsha_voucher_count",
+          appState.voucherCount.toString()
+        )
+        return `${prefix}-${year}-${count}`
+      }
+
+      function allocatePrize() {
+        const random = Math.random() * 100
+        let cumulativeWeight = 0
+
+        for (const [tier, config] of Object.entries(prizeConfig)) {
+          cumulativeWeight += config.weight
+          if (random <= cumulativeWeight) {
+            const randomPrize =
+              config.prizes[Math.floor(Math.random() * config.prizes.length)]
+            return { tier, prize: randomPrize }
+          }
+        }
+
+        // Fallback to common prize
+        return {
+          tier: "common",
+          prize: prizeConfig.common.prizes[0]
+        }
+      }
+
+      function saveData() {
+        localStorage.setItem("vamsha_users", JSON.stringify(appState.users))
+        localStorage.setItem(
+          "vamsha_vouchers",
+          JSON.stringify(appState.vouchers)
+        )
+      }
+
+      function showError(fieldId, message) {
+        const errorElement = document.getElementById(fieldId + "Error")
+        if (errorElement) {
+          errorElement.textContent = message
+          errorElement.style.display = "block"
+        }
+      }
+
+      function clearErrors() {
+        document.querySelectorAll(".error-message").forEach((error) => {
+          error.style.display = "none"
+        })
+      }
+
+      // Registration Logic
+      document
+        .getElementById("registrationForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault()
+          clearErrors()
+
+          const formData = new FormData(e.target)
+          const userData = {
+            name: formData.get("name").trim(),
+            mobile: formData.get("mobile").trim(),
+            dob: formData.get("dob"),
+            religion: formData.get("religion"),
+            pincode: formData.get("pincode").trim(),
+            village: formData.get("village").trim(),
+            landmark: formData.get("landmark").trim(),
+            registeredAt: new Date().toISOString()
+          }
+
+          // Validation
+          let hasErrors = false
+
+          if (!userData.name || userData.name.length < 2) {
+            showError(
+              "name",
+              "Please enter a valid name (minimum 2 characters)"
+            )
+            hasErrors = true
+          }
+
+          if (!userData.mobile || !/^[6-9]\d{9}$/.test(userData.mobile)) {
+            showError("mobile", "Please enter a valid 10-digit mobile number")
+            hasErrors = true
+          }
+
+          // Check if mobile already exists
+          if (appState.users.find((user) => user.mobile === userData.mobile)) {
+            showError("mobile", "This mobile number is already registered")
+            hasErrors = true
+          }
+
+          if (!userData.dob) {
+            showError("dob", "Please select your date of birth")
+            hasErrors = true
+          }
+
+          if (!userData.pincode || !/^\d{6}$/.test(userData.pincode)) {
+            showError("pincode", "Please enter a valid 6-digit pincode")
+            hasErrors = true
+          }
+
+          if (!userData.village || userData.village.length < 2) {
+            showError("village", "Please enter your village/city name")
+            hasErrors = true
+          }
+
+          if (hasErrors) return
+
+          // Generate prize and voucher
+          const prizeData = allocatePrize()
+          const voucherNumber = generateVoucherNumber()
+
+          const voucher = {
+            voucherNumber,
+            mobile: userData.mobile,
+            prize: prizeData.prize,
+            tier: prizeData.tier,
+            status: "active",
+            createdAt: new Date().toISOString()
+          }
+
+          // Save user and voucher
+          appState.users.push(userData)
+          appState.vouchers.push(voucher)
+          appState.currentUser = userData
+          appState.currentVoucher = voucher
+
+          saveData()
+
+          // Show scratch card
+          setupScratchCard(prizeData)
+          showScreen("scratchScreen")
+        })
+
+      // Scratch Card Logic
+      function setupScratchCard(prizeData) {
+        const canvas = document.getElementById("scratchCanvas")
+        const ctx = canvas.getContext("2d")
+        const scratchSurface = document.getElementById("scratchSurface")
+
+        // Set up canvas
+        ctx.fillStyle = "#c0c0c0"
+        ctx.fillRect(0, 0, 300, 200)
+
+        // Add scratch pattern
+        ctx.font = "16px Arial"
+        ctx.fillStyle = "#999"
+        ctx.textAlign = "center"
+        ctx.fillText("Scratch Here!", 150, 100)
+
+        // Update prize display
+        document.getElementById("prizeTitle").textContent = "Congratulations!"
+        document.getElementById(
+          "prizeDescription"
+        ).textContent = `You won: ${prizeData.prize}`
+
+        let isScratching = false
+        let scratchedArea = 0
+
+        function getScratchPosition(e) {
+          const rect = canvas.getBoundingClientRect()
+          const clientX = e.clientX || (e.touches && e.touches[0].clientX)
+          const clientY = e.clientY || (e.touches && e.touches[0].clientY)
+          return {
+            x: clientX - rect.left,
+            y: clientY - rect.top
+          }
+        }
+
+        function scratch(x, y) {
+          ctx.globalCompositeOperation = "destination-out"
+          ctx.beginPath()
+          ctx.arc(x, y, 20, 0, 2 * Math.PI)
+          ctx.fill()
+
+          // Calculate scratched area (simplified)
+          scratchedArea += 0.5
+
+          if (scratchedArea > 30) {
+            revealPrize()
+          }
+        }
+
+        function revealPrize() {
+          scratchSurface.style.opacity = "0"
+          canvas.style.opacity = "0"
+
+          // Show confetti
+          createConfetti()
+
+          // Show voucher button after delay
+          setTimeout(() => {
+            document.getElementById("viewVoucherBtn").style.display = "block"
+          }, 1000)
+        }
+
+        // Mouse events
+        canvas.addEventListener("mousedown", (e) => {
+          isScratching = true
+          const pos = getScratchPosition(e)
+          scratch(pos.x, pos.y)
+        })
+
+        canvas.addEventListener("mousemove", (e) => {
+          if (isScratching) {
+            const pos = getScratchPosition(e)
+            scratch(pos.x, pos.y)
+          }
+        })
+
+        canvas.addEventListener("mouseup", () => {
+          isScratching = false
+        })
+
+        // Touch events
+        canvas.addEventListener("touchstart", (e) => {
+          e.preventDefault()
+          isScratching = true
+          const pos = getScratchPosition(e)
+          scratch(pos.x, pos.y)
+        })
+
+        canvas.addEventListener("touchmove", (e) => {
+          e.preventDefault()
+          if (isScratching) {
+            const pos = getScratchPosition(e)
+            scratch(pos.x, pos.y)
+          }
+        })
+
+        canvas.addEventListener("touchend", (e) => {
+          e.preventDefault()
+          isScratching = false
+        })
+      }
+
+      function createConfetti() {
+        const colors = ["#f39c12", "#e74c3c", "#9b59b6", "#3498db", "#2ecc71"]
+
+        for (let i = 0; i < 50; i++) {
+          setTimeout(() => {
+            const confetti = document.createElement("div")
+            confetti.className = "confetti"
+            confetti.style.left = Math.random() * window.innerWidth + "px"
+            confetti.style.backgroundColor =
+              colors[Math.floor(Math.random() * colors.length)]
+            confetti.style.animationDelay = Math.random() * 2 + "s"
+            document.body.appendChild(confetti)
+
+            setTimeout(() => {
+              document.body.removeChild(confetti)
+            }, 3000)
+          }, i * 100)
+        }
+      }
+
+      function showVoucher() {
+        if (appState.currentVoucher) {
+          document.getElementById("voucherNumber").textContent =
+            appState.currentVoucher.voucherNumber
+          document.getElementById("voucherPrize").textContent =
+            appState.currentVoucher.prize
+          showScreen("voucherScreen")
+        }
+      }
+
+      // Staff Validation
+      function validateVoucher() {
+        const voucherInput = document
+          .getElementById("voucherInput")
+          .value.trim()
+          .toUpperCase()
+        const resultDiv = document.getElementById("validationResult")
+        const messageDiv = document.getElementById("validationMessage")
+
+        if (!voucherInput) {
+          messageDiv.innerHTML = "Please enter a voucher number"
+          resultDiv.className = "validation-result invalid"
+          resultDiv.style.display = "block"
+          return
+        }
+
+        const voucher = appState.vouchers.find(
+          (v) => v.voucherNumber === voucherInput
+        )
+
+        if (!voucher) {
+          messageDiv.innerHTML =
+            "❌ Invalid Voucher<br>Voucher number not found"
+          resultDiv.className = "validation-result invalid"
+        } else if (voucher.status === "claimed") {
+          messageDiv.innerHTML =
+            "❌ Already Claimed<br>This voucher has been redeemed"
+          resultDiv.className = "validation-result invalid"
+        } else {
+          const user = appState.users.find((u) => u.mobile === voucher.mobile)
+          messageDiv.innerHTML = `✅ Valid Voucher<br><strong>Prize:</strong> ${
+            voucher.prize
+          }<br><strong>Customer:</strong> ${
+            user ? user.name : "Unknown"
+          }<br><strong>Mobile:</strong> ${voucher.mobile}`
+          resultDiv.className = "validation-result valid"
+
+          // Add claim button
+          const claimBtn = document.createElement("button")
+          claimBtn.textContent = "Mark as Claimed"
+          claimBtn.className = "btn"
+          claimBtn.style.marginTop = "15px"
+          claimBtn.onclick = () => claimVoucher(voucherInput)
+          messageDiv.appendChild(claimBtn)
+        }
+
+        resultDiv.style.display = "block"
+      }
+
+      function claimVoucher(voucherNumber) {
+        const voucher = appState.vouchers.find(
+          (v) => v.voucherNumber === voucherNumber
+        )
+        if (voucher) {
+          voucher.status = "claimed"
+          voucher.claimedAt = new Date().toISOString()
+          saveData()
+
+          document.getElementById("validationMessage").innerHTML =
+            "✅ Voucher Successfully Claimed!<br>Prize has been handed over to customer."
+          document.getElementById("voucherInput").value = ""
+        }
+      }
+
+      // Social Media Links
+      function openSocialLink(platform) {
+        const links = {
+          facebook: "https://facebook.com/vamsha",
+          instagram: "https://instagram.com/vamsha",
+          youtube: "https://youtube.com/vamsha"
+        }
+
+        if (links[platform]) {
+          window.open(links[platform], "_blank")
+        }
+      }
+
+      // Initialize app
+      console.log("Vamsha App MVP Loaded")
+      console.log("Users:", appState.users.length)
+      console.log("Vouchers:", appState.vouchers.length)
+    </script>
+  </body>
+</html>
